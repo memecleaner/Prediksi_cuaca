@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediksi Cuaca - Prototipe JS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🌦️ Prediksi Cuaca Berdasarkan Lokasi</h1>
+        
+        <div id="lokasi" class="info">Mendeteksi lokasi pengguna...</div>
+        
+        <div id="hasil" class="result">Menunggu data cuaca...</div>
+        
+        <div id="manual-input" style="display: none;">
+            <p>Lokasi otomatis gagal. Masukkan lokasi manual (contoh: Jakarta Pusat):</p>
+            <input type="text" id="manual-location" placeholder="Masukkan Nama Lokasi">
+            <button id="submit-manual">Cari Cuaca</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
