@@ -25,9 +25,8 @@ function hitungJarak(lat1, lon1, lat2, lon2) {
 navigator.geolocation.getCurrentPosition(async (pos) => {
   const lat = pos.coords.latitude;
   const lon = pos.coords.longitude;
-  lokasiEl.textContent = `📍 Latitude: ${lat.toFixed(6)}, Longitude: ${lon.toFixed(6)}`;
 
-  // Pilih lokasi BMKG terdekat
+  // Koordinat BMKG Depok
   const lokasiBMKGKoord = {
     "Beji": {lat:-6.4026, lon:106.7940},
     "Tugu": {lat:-6.3615, lon:106.8497},
@@ -47,12 +46,18 @@ navigator.geolocation.getCurrentPosition(async (pos) => {
     }
   });
 
+  // Tampilkan nama lokasi + lat/lon
+  lokasiEl.innerHTML = `📍 Lokasi terdeteksi: <b>${terdekat.nama}, Depok</b><br>
+                        Latitude: ${lat.toFixed(6)}, Longitude: ${lon.toFixed(6)}`;
+
   await fetchCuaca(terdekat.kode, terdekat.nama);
+
 }, (err)=>{
   lokasiEl.textContent = "Gagal mendeteksi lokasi.";
   cuacaSekarangEl.textContent = "Prediksi cuaca tidak tersedia.";
 });
 
+// Fungsi fetch cuaca
 async function fetchCuaca(kode, nama) {
   const url = `https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=${kode}`;
   try {
@@ -67,7 +72,7 @@ async function fetchCuaca(kode, nama) {
     const semuaSlot = data.data[0].cuaca.flat();
     const now = new Date();
 
-    // Cari slot paling dekat sekarang
+    // Slot paling dekat sekarang
     let slotTerdekat = null;
     let diffMin = Infinity;
     semuaSlot.forEach(slot=>{
@@ -79,14 +84,13 @@ async function fetchCuaca(kode, nama) {
       }
     });
 
-    // Tampilkan cuaca sekarang
+    // Tampilkan cuaca sekarang (lebih rapih)
     if(slotTerdekat){
       cuacaSekarangEl.innerHTML = `
         <div>🌤️ ${slotTerdekat.weather_desc}</div>
         <div>Suhu: ${slotTerdekat.t}°C</div>
         <div>Kelembaban: ${slotTerdekat.hu}%</div>
-        <div>🕒 Slot BMKG: ${new Date(slotTerdekat.local_datetime).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
-        <img src="${slotTerdekat.image}" alt="${slotTerdekat.weather_desc}">
+        <div class="cuaca-slot">🕒 Slot BMKG: ${new Date(slotTerdekat.local_datetime).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
       `;
     } else {
       cuacaSekarangEl.textContent = "Prediksi cuaca tidak tersedia.";
@@ -104,6 +108,7 @@ async function fetchCuaca(kode, nama) {
   }
 }
 
+// Tambah slot prediksi
 function addPrediksi(slot){
   const div = document.createElement("div");
   div.className = "cuaca-item";
@@ -111,8 +116,7 @@ function addPrediksi(slot){
     <div>🌤️ ${slot.weather_desc}</div>
     <div>Suhu: ${slot.t}°C</div>
     <div>Kelembaban: ${slot.hu}%</div>
-    <div>🕒 Slot BMKG: ${new Date(slot.local_datetime).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
-    <img src="${slot.image}" alt="${slot.weather_desc}">
+    <div class="cuaca-slot">🕒 Slot BMKG: ${new Date(slot.local_datetime).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
   `;
   cuacaPrediksiEl.appendChild(div);
 }

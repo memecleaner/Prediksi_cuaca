@@ -18,38 +18,49 @@ body {
     text-align: center;
   }
   
+  h4 {
+    text-align: center;
+  }
+  
+  #lokasi {
+    text-align: center;
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+  
   .cuaca-item {
     border-bottom: 1px solid #eee;
     padding: 10px;
     margin-bottom: 10px;
     border-radius: 5px;
     background-color: #f9f9f9;
-    display: flex;
-    flex-direction: column; /* INFO MENURUN */
-    gap: 5px;
   }
   
   .cuaca-item.besar {
     font-size: 1.3em;
     font-weight: bold;
-    background-color: #d0f0ff;
-    text-align: center; /* 🌤️ Berawan di tengah */
+    background-color: #a0d8ff; /* biru muda */
+    text-align: center;
   }
   
   .cuaca-list .cuaca-item {
-    font-size: 0.95em;
+    font-size: 1em;
     background-color: #f0f0f0;
-    text-align: left; /* Prediksi rata kiri */
-  }
-  
-  .cuaca-item img {
-    width: 32px;
-    height: 32px;
-    vertical-align: middle;
   }
   
   .cuaca-list {
     max-height: 400px;
     overflow-y: auto;
+  }
+  
+  .cuaca-slot {
+    font-weight: normal;
+    font-size: 0.85em;
+    margin-top: 5px;
+  }
+  
+  /* hapus gambar cuaca */
+  .cuaca-item img {
+    display: none;
   }
   
