@@ -1,123 +1,118 @@
-document.addEventListener("DOMContentLoaded", () => {
-    // === A. KONFIGURASI PENTING ===
-    // WARNING: KUNCI API TERPASANG DI SINI! (Hanya untuk prototipe kelulusan)
-    const API_KEY = "310cc95a017643050d85abdd4cfaba11"; // GANTI DENGAN KUNCI ANDA YANG SUDAH AKTIF
+const lokasiEl = document.getElementById("lokasi");
+const cuacaSekarangEl = document.getElementById("cuaca-sekarang");
+const cuacaPrediksiEl = document.getElementById("cuaca-prediksi");
 
-    // --- Deklarasi DOM ---
-    const lokasiEl = document.getElementById("lokasi");
-    const hasilEl = document.getElementById("hasil");
-    const manualInputEl = document.getElementById("manual-input");
-    const manualLocationEl = document.getElementById("manual-location");
-    const submitManualEl = document.getElementById("submit-manual");
+// Daftar lokasi BMKG Depok
+const lokasiBMKG = [
+  {nama:"Beji", kode:"32.76.06.1001"},
+  {nama:"Tugu", kode:"32.76.02.1009"},
+  {nama:"Pondok Cina", kode:"32.76.06.1005"},
+  {nama:"Depok Jaya", kode:"32.76.01.1007"},
+  {nama:"Sawangan", kode:"32.76.03.1010"}
+];
 
-    manualInputEl.style.display = "block";
+// Fungsi hitung jarak (Haversine)
+function hitungJarak(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2-lat1)*Math.PI/180;
+  const dLon = (lon2-lon1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  const c = 2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R*c;
+}
 
-    /**
-     * Mengambil data cuaca berdasarkan Lat/Lon (Langsung dari OWM)
-     */
-    async function getCuaca(lat, lon, namaWilayah = 'Lokasi Anda') {
-        try {
-            hasilEl.classList.add("loading");
-            hasilEl.textContent = `Sedang mencari data cuaca untuk ${namaWilayah}...`;
+// Dapatkan lokasi pengguna
+navigator.geolocation.getCurrentPosition(async (pos) => {
+  const lat = pos.coords.latitude;
+  const lon = pos.coords.longitude;
+  lokasiEl.textContent = `📍 Latitude: ${lat.toFixed(6)}, Longitude: ${lon.toFixed(6)}`;
 
-            // URL OWM Langsung
-            const owmUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=id&appid=${API_KEY}`;
-            console.log(`Fetching OWM:`, owmUrl);
+  // Pilih lokasi BMKG terdekat
+  const lokasiBMKGKoord = {
+    "Beji": {lat:-6.4026, lon:106.7940},
+    "Tugu": {lat:-6.3615, lon:106.8497},
+    "Pondok Cina": {lat:-6.3626, lon:106.8200},
+    "Depok Jaya": {lat:-6.4000, lon:106.8300},
+    "Sawangan": {lat:-6.3720, lon:106.8000}
+  };
 
-            const res = await fetch(owmUrl);
-
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({ message: res.statusText }));
-                // Jika 401, minta cek kunci
-                if (res.status === 401) {
-                    throw new Error(`401 Unauthorized. Kunci API tidak valid atau belum aktif.`);
-                }
-                throw new Error(`API OWM Gagal: ${res.status} - ${errorData.message}`);
-            }
-
-            const data = await res.json();
-            
-            // Parsing data OWM yang Sederhana
-            const prakiraan = data.weather[0]; // Cuaca
-            const main = data.main;         // Suhu, Kelembapan
-            const wind = data.wind;         // Angin
-            
-            hasilEl.innerHTML = `
-                <h3>🌍 ${namaWilayah} (${data.name || 'Wilayah'})</h3>
-                <p><b>Cuaca:</b> ${prakiraan.description}</p>
-                <p><b>Suhu:</b> ${main.temp} °C</p>
-                <p><b>Kelembapan:</b> ${main.humidity}%</p>
-                <p><b>Kecepatan Angin:</b> ${Math.round(wind.speed * 3.6 * 10) / 10} km/jam</p>
-            `;
-            lokasiEl.textContent = `Lokasi: ${namaWilayah}`;
-            hasilEl.classList.remove("loading");
-
-        } catch (err) {
-            console.error("Error fetching weather:", err);
-            hasilEl.textContent = `Terjadi kesalahan saat memuat data: ${err.message}.`;
-            lokasiEl.textContent = `Lokasi: ${namaWilayah || 'Gagal'}`;
-            hasilEl.classList.remove("loading");
-        }
+  let terdekat = lokasiBMKG[0];
+  let minJarak = Infinity;
+  lokasiBMKG.forEach(lok => {
+    const k = lokasiBMKGKoord[lok.nama];
+    const jarak = hitungJarak(lat, lon, k.lat, k.lon);
+    if(jarak < minJarak) {
+      minJarak = jarak;
+      terdekat = lok;
     }
-    
-    /**
-     * Mendapatkan Lat/Lon dari nama lokasi manual menggunakan OWM Geocoding.
-     */
-    async function getLatLonFromName(cityName) {
-        try {
-            const geoUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${API_KEY}`;
-            const res = await fetch(geoUrl);
-            
-            if (!res.ok) throw new Error(`Geocoding OWM Gagal: ${res.status}`);
+  });
 
-            const data = await res.json();
+  await fetchCuaca(terdekat.kode, terdekat.nama);
+}, (err)=>{
+  lokasiEl.textContent = "Gagal mendeteksi lokasi.";
+  cuacaSekarangEl.textContent = "Prediksi cuaca tidak tersedia.";
+});
 
-            if (data && data.length > 0) {
-                return { lat: data[0].lat, lon: data[0].lon, name: `${data[0].name}, ${data[0].state || ''} ${data[0].country}` };
-            }
-            return null; // Lokasi tidak ditemukan
-        } catch(err) {
-            console.error("Geocoding Error:", err);
-            return null;
-        }
+async function fetchCuaca(kode, nama) {
+  const url = `https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=${kode}`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if(!data.data || !data.data[0].cuaca) {
+      cuacaSekarangEl.textContent = "Prediksi cuaca tidak tersedia.";
+      return;
     }
 
+    const semuaSlot = data.data[0].cuaca.flat();
+    const now = new Date();
 
-    // === B. LOGIKA GEOLOCATION (Pencarian Otomatis) ===
-    if (navigator.geolocation) {
-        lokasiEl.textContent = "Mendeteksi lokasi pengguna...";
-        navigator.geolocation.getCurrentPosition(
-            (pos) => {
-                getCuaca(pos.coords.latitude, pos.coords.longitude); 
-            },
-            (err) => {
-                // Fallback ke Jakarta jika gagal otomatis
-                lokasiEl.textContent = "Lokasi otomatis gagal. Menggunakan lokasi default (Jakarta).";
-                getCuaca(-6.2, 106.8); 
-            },
-            { timeout: 10000, enableHighAccuracy: true }
-        );
-    } else {
-        lokasiEl.textContent = "Browser tidak mendukung geolocation. Menggunakan lokasi default (Jakarta).";
-        getCuaca(-6.2, 106.8);
-    }
-
-    // === C. EVENT LISTENER INPUT MANUAL ===
-    submitManualEl.addEventListener("click", async () => {
-        const manualName = manualLocationEl.value.trim();
-        if (manualName) {
-            hasilEl.classList.add("loading");
-            hasilEl.textContent = `Mencari koordinat untuk ${manualName}...`;
-            
-            const locationData = await getLatLonFromName(manualName);
-            
-            if (locationData) {
-                 getCuaca(locationData.lat, locationData.lon, locationData.name);
-            } else {
-                 hasilEl.textContent = `Lokasi "${manualName}" tidak ditemukan. Coba nama kota yang lebih spesifik.`;
-                 hasilEl.classList.remove("loading");
-            }
-        }
+    // Cari slot paling dekat sekarang
+    let slotTerdekat = null;
+    let diffMin = Infinity;
+    semuaSlot.forEach(slot=>{
+      const slotTime = new Date(slot.local_datetime);
+      const diff = Math.abs(slotTime - now);
+      if(diff < diffMin){
+        diffMin = diff;
+        slotTerdekat = slot;
+      }
     });
 
-});
+    // Tampilkan cuaca sekarang
+    if(slotTerdekat){
+      cuacaSekarangEl.innerHTML = `
+        <div>🌤️ ${slotTerdekat.weather_desc}</div>
+        <div>Suhu: ${slotTerdekat.t}°C</div>
+        <div>Kelembaban: ${slotTerdekat.hu}%</div>
+        <div>🕒 Slot BMKG: ${new Date(slotTerdekat.local_datetime).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+        <img src="${slotTerdekat.image}" alt="${slotTerdekat.weather_desc}">
+      `;
+    } else {
+      cuacaSekarangEl.textContent = "Prediksi cuaca tidak tersedia.";
+    }
+
+    // Prediksi 3 slot berikutnya
+    cuacaPrediksiEl.innerHTML = "";
+    const indexTerdekat = semuaSlot.indexOf(slotTerdekat);
+    const prediksiNext = semuaSlot.slice(indexTerdekat+1, indexTerdekat+4);
+    prediksiNext.forEach(slot=> addPrediksi(slot));
+
+  } catch(err){
+    cuacaSekarangEl.textContent = "Prediksi cuaca tidak tersedia.";
+    console.error(err);
+  }
+}
+
+function addPrediksi(slot){
+  const div = document.createElement("div");
+  div.className = "cuaca-item";
+  div.innerHTML = `
+    <div>🌤️ ${slot.weather_desc}</div>
+    <div>Suhu: ${slot.t}°C</div>
+    <div>Kelembaban: ${slot.hu}%</div>
+    <div>🕒 Slot BMKG: ${new Date(slot.local_datetime).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+    <img src="${slot.image}" alt="${slot.weather_desc}">
+  `;
+  cuacaPrediksiEl.appendChild(div);
+}
