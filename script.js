@@ -4,12 +4,18 @@ const cuacaPrediksiEl = document.getElementById("cuaca-prediksi");
 
 // Daftar lokasi BMKG Depok
 const lokasiBMKG = [
-  {nama:"Beji", kode:"32.76.06.1001"},
-  {nama:"Tugu", kode:"32.76.02.1009"},
-  {nama:"Pondok Cina", kode:"32.76.06.1005"},
-  {nama:"Depok Jaya", kode:"32.76.01.1007"},
-  {nama:"Sawangan", kode:"32.76.03.1010"}
-];
+    {nama:"Beji", kode:"32.76.06.1001"},
+    {nama:"Tugu", kode:"32.76.02.1009"},
+    {nama:"Pondok Cina", kode:"32.76.06.1005"},
+    {nama:"Depok Jaya", kode:"32.76.01.1007"},
+    {nama:"Sawangan", kode:"32.76.03.1010"},
+    {nama:"Cipayung", kode:"32.76.07.1001"},
+    {nama:"Harjamukti", kode:"32.76.02.1007"},
+    {nama:"Duren Seribu (Bojongsari)", kode:"32.76.11.1007"},
+    {nama:"Depok (Pancoran Mas)", kode:"32.76.01.1006"},
+    {nama:"Citayam (Tajurhalang)", kode:"32.01.37.2002"},
+    {nama:"Cipayung Jaya", kode:"32.76.07.1002"}
+  ];
 
 // Fungsi hitung jarak (Haversine)
 function hitungJarak(lat1, lon1, lat2, lon2) {
@@ -32,7 +38,13 @@ navigator.geolocation.getCurrentPosition(async (pos) => {
     "Tugu": {lat:-6.3615, lon:106.8497},
     "Pondok Cina": {lat:-6.3626, lon:106.8200},
     "Depok Jaya": {lat:-6.4000, lon:106.8300},
-    "Sawangan": {lat:-6.3720, lon:106.8000}
+    "Sawangan": {lat:-6.3720, lon:106.8000},
+    "Cipayung": {lat:-6.3885, lon:106.8410},
+    "Harjamukti": {lat:-6.3557, lon:106.8575},
+    "Duren Seribu (Bojongsari)": {lat:-6.4172, lon:106.7481},
+    "Depok (Pancoran Mas)": {lat:-6.3950, lon:106.8180},
+    "Citayam (Tajurhalang)": {lat:-6.4660, lon:106.7750},
+    "Cipayung Jaya": {lat:-6.3805, lon:106.8442}
   };
 
   let terdekat = lokasiBMKG[0];
