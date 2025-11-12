@@ -1,66 +1,73 @@
 body {
-    font-family: sans-serif;
-    padding: 15px;
-    line-height: 1.5;
-    background-color: #f5f5f5;
-  }
-  
-  .container {
-    max-width: 500px;
-    margin: auto;
-    background-color: #fff;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  }
-  
-  h1 {
-    text-align: center;
-  }
-  
-  h4 {
-    text-align: center;
-  }
-  
-  #lokasi {
-    text-align: center;
-    margin-bottom: 15px;
-    font-weight: bold;
-  }
-  
-  .cuaca-item {
-    border-bottom: 1px solid #eee;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-  }
-  
-  .cuaca-item.besar {
-    font-size: 1.3em;
-    font-weight: bold;
-    background-color: #a0d8ff; /* biru muda */
-    text-align: center;
-  }
-  
-  .cuaca-list .cuaca-item {
-    font-size: 1em;
-    background-color: #f0f0f0;
-  }
-  
-  .cuaca-list {
-    max-height: 400px;
-    overflow-y: auto;
-  }
-  
-  .cuaca-slot {
-    font-weight: normal;
-    font-size: 0.85em;
-    margin-top: 5px;
-  }
-  
-  /* hapus gambar cuaca */
-  .cuaca-item img {
-    display: none;
-  }
-  
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background-color: #f5f7fb;
+  margin: 0;
+  padding: 16px;
+  color: #111827;
+}
+
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 8px 30px rgba(2,6,23,0.08);
+}
+
+h1 { 
+  margin: 0; color:#0b6fb5; 
+  text-align: center;
+}
+h4 { margin: 4px 0 12px; color:#52606d; font-weight:500; text-align: center;}
+
+#lokasi {
+  font-weight:700;
+  margin: 8px 0 12px;
+}
+
+/* Tombol refresh */
+#refresh-btn {
+  display:block;
+  margin: 0 auto 10px;
+  background:#0b6fb5;
+  color:white;
+  border:none;
+  border-radius:8px;
+  padding:8px 16px;
+  cursor:pointer;
+  font-weight:600;
+  transition:background 0.3s;
+}
+#refresh-btn:hover { background:#095d96; }
+
+/* Map */
+#map {
+  height: 340px;
+  width: 100%;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.06);
+}
+
+/* Cuaca cards */
+.cuaca-item {
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+  background: linear-gradient(180deg,#fff,#f7fcff);
+  box-shadow: 0 2px 8px rgba(2,6,23,0.04);
+}
+
+.cuaca-item.besar { font-size:1.05rem; font-weight:600; background:#e6f7ff; text-align:center; }
+
+.cuaca-list { display:block; max-height:360px; overflow:auto; padding:6px 0; }
+
+.cuaca-slot { font-size:0.9rem; color:#6b7280; margin-top:6px; }
+
+.info-distance { margin-top:8px; color:#374151; font-weight:600; }
+
+@media (max-width:640px){
+  #map { height: 260px; }
+  .container { padding:12px; }
+}
